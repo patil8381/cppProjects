@@ -3,7 +3,6 @@
 using namespace inventory;
 using namespace data_layer;
 
-string UnitOfMeasurement::FILE_NAME;
 UnitOfMeasurement::UnitOfMeasurement()
 {
 this->code=0;
@@ -70,9 +69,3 @@ int UnitOfMeasurement::operator>=(const IUnitOfMeasurement &other)
 return this->code>=other.getCode();
 }
 
-int main()
-{
-abc::IUnitOfMeasurement *iuom = new UnitOfMeasurement;
-
-return 0;
-}

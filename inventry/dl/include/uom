@@ -12,7 +12,6 @@ private:
 int code;
 string title;
 public:
-static string FILE_NAME;
 UnitOfMeasurement();
 UnitOfMeasurement(int code,string title);
 UnitOfMeasurement(const UnitOfMeasurement &other);

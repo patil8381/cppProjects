@@ -6,7 +6,6 @@
 #include<daoexception>
 #include<forward_list>
 using namespace std;
-
 namespace inventory
 {
 namespace data_layer
@@ -16,6 +15,7 @@ namespace abc
 class IUnitOfMeasurementDAO
 {
 public:
+static string FILE_NAME;
 virtual void add(IUnitOfMeasurement *unitOfMeasurement) throw(DAOException)=0;
 virtual void update(IUnitOfMeasurement *unitOfMeasurement) throw(DAOException)=0;
 virtual void remove(int code) throw(DAOException)=0;

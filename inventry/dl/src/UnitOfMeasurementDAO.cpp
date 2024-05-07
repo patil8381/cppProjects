@@ -1,45 +1,28 @@
 #include<iostream>
-#include<fstream>
-#include<string.h>
 #include<iuom>
 #include<uom>
-#include<daoexception>
 #include<iuomdao>
 #include<uomdao>
+#include<daoexception>
+#include<fstream>
+#include<string.h>
 #include<forward_list>
 using namespace std;
 using namespace inventory;
 using namespace data_layer;
 
-class Header
+class UnitOfMeasurementDAO::Header
 {
 public:
 int lastGeneratedCode;
 int records;
 };
 
-class _UnitOfMeasurementDAO
+class UnitOfMeasurementDAO::_UnitOfMeasurementDAO
 {
-private:
+public:
 int code;
 char title[51];
-public:
-void setCode(int code)
-{
-this->code=code;
-}
-int getCode()
-{
-return this->code;
-}
-void setTitle(string &title)
-{
-strcpy(this->title,title.c_str());
-}
-string getTitel()
-{
-return string(this->title);
-}
 };
 
 void UnitOfMeasurementDAO::add(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException)
@@ -105,11 +88,6 @@ in which the object which the uom pointer is pointing
 */
 
 
-fstream f;
-f.open(DATA_FILE,ios::out);
-
-f.close();
-
 }
 void UnitOfMeasurementDAO::update(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException)
 {
@@ -128,7 +106,7 @@ return NULL;
 forward_list<abc::IUnitOfMeasurement *> * UnitOfMeasurementDAO::getAll() throw(DAOException)
 {
 /*
-create a new forward list by dynamic memory allocation
+create a new forward list by dynamic memory allocation .
 
 traverse dataFile 
 skip header 
@@ -162,9 +140,12 @@ return 0;
 
 int main()
 {
-abc::IUnitOfMeasurementDAO *iuomdao = new UnitOfMeasurementDAO;
+abc::IUnitOfMeasurementDAO *uomdao = new UnitOfMeasurementDAO;
 
-abc::IUnitOfMeasurement *iuom = new UnitOfMeasurement();
+abc::IUnitOfMeasurement *uom = new UnitOfMeasurement;	//this is giving error as undefined reference to `inventory::data_layer::UnitOfMeasurement::UnitOfMeasurement()'
+
+UnitOfMeasurement m;	//this is giving error as undefined reference to `inventory::data_layer::UnitOfMeasurement::UnitOfMeasurement()'
+					//and undefined reference to `inventory::data_layer::UnitOfMeasurement::~UnitOfMeasurement()'
 
 return 0;
 }

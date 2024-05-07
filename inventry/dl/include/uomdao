@@ -13,11 +13,9 @@ namespace data_layer
 {
 class UnitOfMeasurementDAO:public abc::IUnitOfMeasurementDAO
 {
-private:
+public:
 class Header;
 class _UnitOfMeasurementDAO;
-public:
-static string DATA_FILE;
 void add(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException);
 void update(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException);
 void remove(int code) throw(DAOException);
@@ -28,7 +26,6 @@ int codeExists(int code) throw(DAOException);
 int titleExists(string title) throw(DAOException);
 int getCount() throw(DAOException);
 };
-string UnitOfMeasurementDAO::DATA_FILE="datafile.dd";
 }
 }
 #endif
