@@ -1,0 +1,34 @@
+#ifndef __$__uomdao__
+#define __$__uomdao__ 1234
+#include<iostream>
+#include<iuom>
+#include<uom>
+#include<daoexception>
+#include<iuomdao>
+#include<forward_list>
+using namespace std;
+namespace inventory
+{
+namespace data_layer
+{
+class UnitOfMeasurementDAO:public abc::IUnitOfMeasurementDAO
+{
+private:
+class Header;
+class _UnitOfMeasurementDAO;
+public:
+static string DATA_FILE;
+void add(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException);
+void update(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException);
+void remove(int code) throw(DAOException);
+abc::IUnitOfMeasurement * getByCode(int code) throw(DAOException);
+abc::IUnitOfMeasurement * getByTitle(string title) throw(DAOException);
+forward_list<abc::IUnitOfMeasurement *> * getAll() throw(DAOException);
+int codeExists(int code) throw(DAOException);
+int titleExists(string title) throw(DAOException);
+int getCount() throw(DAOException);
+};
+string UnitOfMeasurementDAO::DATA_FILE="datafile.dd";
+}
+}
+#endif
