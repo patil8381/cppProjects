@@ -4,12 +4,14 @@
 #include<iuomdao>
 #include<uomdao>
 #include<daoexception>
+#include<stringutils>
 #include<fstream>
 #include<string.h>
 #include<forward_list>
 using namespace std;
 using namespace inventory;
 using namespace data_layer;
+using namespace stringutils;
 
 class UnitOfMeasurementDAO::Header
 {
@@ -27,66 +29,62 @@ char title[51];
 
 void UnitOfMeasurementDAO::add(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException)
 {
-/*	
-    check validations--------
-	uom!=NULL;
-	check title is not null
-	check title does not exceeds 25 char
-	code==0
-
-	if invalid the throw/raise DAOException message
-
-if data valid 
-perform title duplicacy check (Incase sensitive)
+if(unitOfMeasurement==NULL) 
 {
-skip first record
-
-traverse through all records(loop) 
-on every cycle 
-compare string (Title)
+throw DAOException("Pointer cannot be NULL");
 }
-else raise DAOException
-
-	file banegi
-	file k first block me lastGeneratedCode and numberOfRecords hoga
-
-	file me add ka logic
-
-	openfile "fileName" filename which is declared static
-	iuomdao abstract class me dataFile ki static property bana denge
-
-if file empty then add header +record
-header me ky lastgeneratedCode  1
-	and  noOfRecords 	1
-
-open file in binary mode 
-read write object 
-
-if not empty 
+const string vTitle=unitOfMeasurement->getTitle();
+string title = trimmed(vTitle);
+if(title.length()==0)
 {
-jb record add karna hoga to new code kya 
-newCode = lastGeneratedCode+1;
-
-add record at end and update header
-
+throw DAOException("Title required, length is zero");
+}
+if(title.length()>50)
+{
+throw DAOException("Title cannot exceed 50");
 }
 
-try
+Header header;
+_UnitOfMeasurementDAO _unitOfMeasurementDAO;
+fstream dataFile(FILE_NAME,ios::out | ios::in | ios::binary);
+if(dataFile.fail())
 {
-m.add(&k);
-
-what is the allotted code (default zero mangvaya) mtlb lastGeneratedCode update karna hai
-
-update the code in newly generated code 
-in which the object which the uom pointer is pointing 
-
-}catch(DAOException &d)
-{
+fstream dFile(FILE_NAME,ios::app | ios::binary);
+header.lastGeneratedCode=1;
+header.records=1;
+dFile.write((char *)&header,sizeof(Header));
+_unitOfMeasurementDAO.code=1;
+strcpy(_unitOfMeasurementDAO.title,title.c_str());
+dFile.write((char *)&_unitOfMeasurementDAO,sizeof(_UnitOfMeasurementDAO));
+dFile.close();
+unitOfMeasurement->setCode(1);
+return;
 }
-
-
-*/
-
+dataFile.read((char *)&header,sizeof(Header));
+while(1)
+{
+dataFile.read((char *)&_unitOfMeasurementDAO,sizeof(_UnitOfMeasurementDAO));
+if(dataFile.fail()) break;
+cout<<title<<" 1 "<<endl;				//delete this later
+cout<<_unitOfMeasurementDAO.title<<" 2 "<<endl;		//delete this later
+if(compareStringIgnoreCase(_unitOfMeasurementDAO.title,title.c_str())==0) 
+{
+dataFile.close();
+throw DAOException(title+" Exists");
+}
+}
+header.lastGeneratedCode++;
+header.records++;
+_unitOfMeasurementDAO.code=header.lastGeneratedCode;
+strcpy(_unitOfMeasurementDAO.title,title.c_str());
+cout<<title<<" 3 "<<endl;					//delete this later
+cout<<_unitOfMeasurementDAO.title<<" 4 "<<endl;		//delete this later
+dataFile.seekp(0,ios::end);
+dataFile.write((char *)&_unitOfMeasurementDAO,sizeof(_UnitOfMeasurementDAO));
+dataFile.seekp(0,ios::beg);
+dataFile.write((char *)&header,sizeof(Header));
+dataFile.close();
+unitOfMeasurement->setCode(_unitOfMeasurementDAO.code);
 
 }
 void UnitOfMeasurementDAO::update(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException)
@@ -138,14 +136,3 @@ int UnitOfMeasurementDAO::getCount() throw(DAOException)
 return 0;
 }
 
-int main()
-{
-abc::IUnitOfMeasurementDAO *uomdao = new UnitOfMeasurementDAO;
-
-abc::IUnitOfMeasurement *uom = new UnitOfMeasurement;	//this is giving error as undefined reference to `inventory::data_layer::UnitOfMeasurement::UnitOfMeasurement()'
-
-UnitOfMeasurement m;	//this is giving error as undefined reference to `inventory::data_layer::UnitOfMeasurement::UnitOfMeasurement()'
-					//and undefined reference to `inventory::data_layer::UnitOfMeasurement::~UnitOfMeasurement()'
-
-return 0;
-}

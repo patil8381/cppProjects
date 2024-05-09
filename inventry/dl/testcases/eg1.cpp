@@ -12,10 +12,15 @@ int main()
 {
 abc::IUnitOfMeasurementDAO *uomdao = new UnitOfMeasurementDAO;
 abc::IUnitOfMeasurement *uom = new UnitOfMeasurement();
-
-//uomdao->add(&uom);
-
-
-
+uom->setTitle(string("Gram"));
+try
+{
+uomdao->add(uom);
+cout<<"Unit of Measurement code "<<uom->getCode()<<endl;
+}catch(DAOException daoexception)
+{
+cout<<daoexception.what()<<endl;
+}
+cout<<"done"<<endl;
 return 0;
 }

@@ -1,4 +1,5 @@
 #include<daoexception>
+#include<string.h>
 using namespace inventory;
 using namespace data_layer;
 DAOException::DAOException()
@@ -22,9 +23,9 @@ DAOException & DAOException::operator=(const DAOException &other)
 this->message=other.message;
 return *this;
 }
-DAOException & operator=(const char *message)
+DAOException & DAOException::operator=(const char *message)
 {
-strcpy(this->message=message);
+this->message=message;
 return *this;
 }
 const char * DAOException::what() const throw()
@@ -32,8 +33,3 @@ const char * DAOException::what() const throw()
 return this->message.c_str();
 }
 
-int main()
-{
-DAOException daoexception;
-return 0;
-}

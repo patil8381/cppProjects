@@ -1,5 +1,6 @@
 #include<iuom>
 #include<uom>
+#include<uomdao>
 using namespace inventory;
 using namespace data_layer;
 
@@ -68,4 +69,3 @@ int UnitOfMeasurement::operator>=(const IUnitOfMeasurement &other)
 {
 return this->code>=other.getCode();
 }
-
