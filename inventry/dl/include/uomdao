@@ -15,7 +15,7 @@ class UnitOfMeasurementDAO:public abc::IUnitOfMeasurementDAO
 {
 public:
 class Header;
-class _UnitOfMeasurementDAO;
+class _UnitOfMeasurement;
 void add(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException);
 void update(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException);
 void remove(int code) throw(DAOException);

@@ -31,14 +31,14 @@ for(;*a!='\0' && *b!='\0';a++,b++)
 c=*a;
 if(c>=97 && c<=122) c=c-32;
 d=*b;
-if(d>=97 && d<=122) d=-32;
+if(d>=97 && d<=122) d=d-32;
 if(c!=d) return c-d;
 }
 if(*a==*b) return 0;
 c=*a;
 if(c>=97 && c<=122) c=c-32;
 d=*b;
-if(d>=97 && d<=122) d=-32;
+if(d>=97 && d<=122) d=d-32;
 return c-d;
 }
 
