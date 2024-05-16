@@ -12,11 +12,20 @@ int main()
 {
 abc::IUnitOfMeasurementDAO *uomdao = new UnitOfMeasurementDAO;
 abc::IUnitOfMeasurement *uom = new UnitOfMeasurement();
-uom->setTitle(string("Gram"));
+int code;
+string title;
+cout<<"Enter code to update : ";
+cin>>code;
+uom->setCode(code);
+cout<<"Enter title :";
+cin>>title;
+uom->setTitle(title);
+
 try
 {
-uomdao->add(uom);
-cout<<"Unit of Measurement code "<<uom->getCode()<<endl;
+uomdao->update(uom);
+cout<<"Unit of Measurement Title updated : "<<uom->getCode()<<", Title : "<<uom->getTitle()<<endl;
+
 }catch(DAOException daoexception)
 {
 cout<<daoexception.what()<<endl;

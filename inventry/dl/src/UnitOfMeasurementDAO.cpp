@@ -1,3 +1,4 @@
+#include<stdio.h>
 #include<iostream>
 #include<iuom>
 #include<uom>
@@ -84,11 +85,166 @@ unitOfMeasurement->setCode(_unitOfMeasurement.code);
 }
 void UnitOfMeasurementDAO::update(abc::IUnitOfMeasurement *unitOfMeasurement) throw(DAOException)
 {
+if(unitOfMeasurement->getCode()<=0) 
+{
+throw DAOException(string("unitOfMeasurement code cannot be 0 or less."));
+}
+string title=trimmed(unitOfMeasurement->getTitle());
+if(title=="") throw DAOException(string ("Invalid unitOfMeasurement."));
+Header header;
+fstream dataFile(FILE_NAME,ios::in | ios::out | ios::binary);
+if(dataFile.fail()) throw DAOException(string("Invalid UnitOfMeasurement."));
+dataFile.read((char *)&header,sizeof(Header));
+if(dataFile.fail()) 
+{
+dataFile.close();
+throw DAOException(string("Invalid UnitOfMeasurement."));
+}
+if(header.records==0)
+{
+dataFile.close();
+throw DAOException(string("Invalid UnitOfMeasurement."));
+}
+_UnitOfMeasurement _unitOfMeasurement;
+int pos=dataFile.tellg();
+int found=0;
+//loop to search if uom exists or not.
+while(1)
+{
+pos=dataFile.tellg();
+dataFile.read((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
+if(dataFile.fail()) break;
+if(_unitOfMeasurement.code==unitOfMeasurement->getCode())
+{
+if(compareStringIgnoreCase(_unitOfMeasurement.title,unitOfMeasurement->getTitle().c_str())==0)
+{
+found=1;
+break;
+}
+}
+}
+if(found==0)
+{
+dataFile.close();
+throw DAOException(string("Invalid UnitOfMeasurement."));
+}
+cout<<"Current code : "<<unitOfMeasurement->getCode()<<", Title : "<<unitOfMeasurement->getTitle()<<endl;
+cout<<"Enter new title : ";
+cin>>title;
+title=trimmed(title);
+if(title.length()<=0 || title.length()>50) 
+{
+dataFile.close();
+throw DAOException(string("Invalid UnitOfMeasurement."));
+}
+dataFile.seekg(8,ios::beg);
+while(1)
+{
+dataFile.read((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
+if(dataFile.fail()) break;
+if(compareStringIgnoreCase(_unitOfMeasurement.title,title.c_str())==0)
+{
+dataFile.close();
+throw DAOException(string("Invalid UnitOfMeasurement. Same title already exists."));
+}
+}
+unitOfMeasurement->setTitle(title);
+_unitOfMeasurement.code=unitOfMeasurement->getCode();
+strcpy(_unitOfMeasurement.title,title.c_str());
+cout<<"writing at pos : "<<pos<<endl;
+dataFile.clear();
+dataFile.seekp(pos,ios::beg);
+cout<<"writing at pos : "<<pos<<endl;
+dataFile.write((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
+if(dataFile.fail()) 
+{
+dataFile.close();
+cout<<"Size of UnitOfMeasurement : "<<sizeof(UnitOfMeasurement)<<endl;
+cout<<"Size of _UnitOfMeasurement : "<<sizeof(_UnitOfMeasurement)<<endl;
+cout<<"Size of _unitOfMeasurement : "<<sizeof(_unitOfMeasurement)<<endl;
+throw DAOException(string("Invalid UnitOfMeasurement."));
+}
 }
 void UnitOfMeasurementDAO::remove(int code) throw(DAOException)
 {
+if(code<=0)
+{
+throw DAOException(string("code cannot be less than zero"));
+}
+Header header;
+char arr[101];
+fstream dataFile(FILE_NAME,ios::in | ios::out | ios::binary);
+if(dataFile.fail()) 
+{
+sprintf(arr,"Invalid Code : %d",code);
+throw DAOException(string(arr));
+}
+dataFile.read((char *)&header,sizeof(Header));
+if(dataFile.fail())
+{
+dataFile.close();
+sprintf(arr,"Invalid Code : %d",code);
+throw DAOException(string(arr));
+}
+if(header.records==0)
+{
+dataFile.close();
+sprintf(arr,"Invalid Code : %d",code);
+throw DAOException(string(arr));
+}
+_UnitOfMeasurement _unitOfMeasurement;
+int found=0;
+while(1)
+{
+dataFile.read((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
+if(dataFile.fail()) break;
+if(_unitOfMeasurement.code==code)
+{
+found=1;
+break;
+}
+}
+if(found==0)
+{
+dataFile.close();
+sprintf(arr,"Invalid Code : %d",code);
+throw DAOException(string(arr));
+}
+dataFile.clear();
+header.records--;
+dataFile.seekg(sizeof(Header),ios::beg);
+ofstream tmpFile("tmp.tmp",ios::out | ios::binary);
+tmpFile.write((char *)&header,sizeof(Header));
+while(1)
+{
+dataFile.read((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
+if(dataFile.fail()) break;
+if(_unitOfMeasurement.code!=code) 
+{
+tmpFile.write((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
+}
+}
+dataFile.close();
+tmpFile.close();
+ifstream tmpF("tmp.tmp",ios::in | ios::binary);
+ofstream dataF(FILE_NAME,ios::out | ios::binary);
+tmpF.read((char *)&header,sizeof(Header));
+dataF.write((char *)&header,sizeof(Header));
+while(1)
+{
+tmpF.read((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
+if(tmpF.fail()) break;
+dataF.write((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
+}
+dataF.close();
+tmpF.close();
+tmpFile.open("tmp.tmp");
+tmpFile.close();
 }
 abc::IUnitOfMeasurement * UnitOfMeasurementDAO::getByCode(int code) throw(DAOException)
+{
+UnitOfMeasurementDAO *unitOfMeasurementDAO;
+if(unitOfMeasurementDAO->codeExists(code)==0) 
 {
 fstream dataFile(FILE_NAME,ios::in | ios::binary);
 if(dataFile.fail())
@@ -125,7 +281,11 @@ return iuom;
 }
 throw DAOException("Code in Unit of Measurement not exist.");
 }
+}
 abc::IUnitOfMeasurement * UnitOfMeasurementDAO::getByTitle(string title) throw(DAOException)
+{
+UnitOfMeasurementDAO *unitOfMeasurementDAO;
+if(unitOfMeasurementDAO->titleExists(title)==0) 
 {
 Header header;
 fstream dataFile(FILE_NAME,ios::in | ios::binary);
@@ -157,6 +317,7 @@ iuom=new UnitOfMeasurement;
 iuom->setCode(_unitOfMeasurement.code);
 iuom->setTitle(string(_unitOfMeasurement.title));
 return iuom;
+}
 }
 }
 throw DAOException(string("No such title in Unit Of Measurement."));
@@ -199,29 +360,57 @@ int UnitOfMeasurementDAO::codeExists(int code) throw(DAOException)
 fstream dataFile(FILE_NAME,ios::in | ios::binary);
 if(dataFile.fail())
 {
-throw DAOException(string("File is Empty"));
+return 0;
 }
 Header header;
-_UnitOfMeasurement _unitOfMeasurement;
 dataFile.read((char *)&header,sizeof(Header));
 if(dataFile.fail())
 {
-throw DAOException(string("File is Empty"));
+dataFile.close();
+return 0;
 }
 if(header.records==0)
 {
-throw DAOException(string("File is Empty"));
+dataFile.close();
+return 0;
 }
+_UnitOfMeasurement _unitOfMeasurement;
 while(1)
 {
 dataFile.read((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
 if(dataFile.fail()) break;
 if(_unitOfMeasurement.code==code) return 1;
 }
+dataFile.close();
 return 0;
 }
 int UnitOfMeasurementDAO::titleExists(string title) throw(DAOException)
 {
+fstream dataFile(FILE_NAME,ios::in | ios::binary);
+if(dataFile.fail())
+{
+return 0;
+}
+Header header;
+dataFile.read((char *)&header,sizeof(Header));
+if(dataFile.fail())
+{
+dataFile.close();
+return 0;
+}
+if(header.records==0)
+{
+dataFile.close();
+return 0;
+}
+_UnitOfMeasurement _unitOfMeasurement;
+while(1)
+{
+dataFile.read((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
+if(dataFile.fail()) break;
+if(compareStringIgnoreCase(_unitOfMeasurement.title,title.c_str())==0) return 1;
+}
+dataFile.close();
 return 0;
 }
 int UnitOfMeasurementDAO::getCount() throw(DAOException)

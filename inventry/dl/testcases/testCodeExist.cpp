@@ -11,12 +11,18 @@ using namespace data_layer;
 int main()
 {
 abc::IUnitOfMeasurementDAO *uomdao = new UnitOfMeasurementDAO;
-abc::IUnitOfMeasurement *uom = new UnitOfMeasurement();
-uom->setTitle(string("Gram"));
 try
 {
-uomdao->add(uom);
-cout<<"Unit of Measurement code "<<uom->getCode()<<endl;
+int code;
+cout<<"Enter code : ";
+cin>>code;
+int exists;
+if(uomdao->codeExists(code)) 
+{
+cout<<"Code "<<code<<" exists in Unit Of Measurement."<<endl;
+return 0;
+}
+cout<<"Unit of Measurement with code "<<code<<" does not exists."<<endl;
 }catch(DAOException daoexception)
 {
 cout<<daoexception.what()<<endl;
