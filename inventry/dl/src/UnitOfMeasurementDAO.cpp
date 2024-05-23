@@ -1,11 +1,11 @@
 #include<stdio.h>
 #include<iostream>
-#include<iuom>
-#include<uom>
-#include<iuomdao>
-#include<uomdao>
-#include<daoexception>
-#include<stringutils>
+#include<dl/iuom>
+#include<dl/uom>
+#include<dl/iuomdao>
+#include<dl/uomdao>
+#include<dl/daoexception>
+#include<common/stringutils>
 #include<fstream>
 #include<string.h>
 #include<forward_list>

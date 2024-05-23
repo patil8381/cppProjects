@@ -1,6 +1,5 @@
-#include<iuom>
-#include<uom>
-#include<uomdao>
+#include<bl/iuom>
+#include<bl/uom>
 using namespace inventory;
 using namespace business_layer;
 

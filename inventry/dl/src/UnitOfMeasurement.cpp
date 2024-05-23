@@ -1,6 +1,6 @@
-#include<iuom>
-#include<uom>
-#include<uomdao>
+#include<dl/iuom>
+#include<dl/uom>
+#include<dl/uomdao>
 using namespace inventory;
 using namespace data_layer;
 
