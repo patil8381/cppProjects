@@ -62,15 +62,18 @@ forward_list<inventory::data_layer::abc::IUnitOfMeasurement *>::iterator i;
 abc::IUnitOfMeasurement *blUnitOfMeasurement;
 i=dlUnitOfMeasurements->begin();
 inventory::data_layer::abc::IUnitOfMeasurement * dluom;
+int code;
+string title;
 while(i!=dlUnitOfMeasurements->end())
 {
 dluom=*i;
 blUnitOfMeasurement=new UnitOfMeasurement;
-blUnitOfMeasurement->setCode(dluom->getCode());
-blUnitOfMeasurement->setTitle(dluom->getTitle());
+code=dluom->getCode();
+title=dluom->getCode();
+blUnitOfMeasurement->setCode(code);
+blUnitOfMeasurement->setTitle(title);
 codeWiseMap.insert(pair<int,abc::IUnitOfMeasurement *>(dluom->getCode(),blUnitOfMeasurement));
-//map<string *,abc::IUnitOfMeasurement *> titleWiseMap;
-//titleWiseMap.insert(pair<string *,abc::IUnitOfMeasurement *>(dluom->getTitle().c_str(),blUnitOfMeasurement));
+titleWiseMap.insert(pair<string *,abc::IUnitOfMeasurement *>(&title,blUnitOfMeasurement));
 
 delete dluom;
 ++i;
