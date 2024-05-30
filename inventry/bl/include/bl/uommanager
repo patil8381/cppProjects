@@ -28,7 +28,7 @@ class DataModel
 {
 public:
 map<int,_UnitOfMeasurement *> codeWiseMap;
-map<string *,_UnitOfMeasurement *> titleWiseMap;
+map<string *,_UnitOfMeasurement *,UnitOfMeasurementTitleComparator> titleWiseMap;
 DataModel();
 ~DataModel();
 void populateDataStructures();
@@ -37,12 +37,14 @@ static DataModel dataModel;
 public:
 UnitOfMeasurementManager();
 void addUnitOfMeasurement(abc::IUnitOfMeasurement *unitOfMeasurement) throw(BLException);
+
 void updateUnitOfMeasurement(abc::IUnitOfMeasurement *unitOfMeasurement) throw(BLException);
 void removeUnitOfMeasurementByCode(int code) throw(BLException);
 void removeUnitOfMeasurementByTitle(string &title) throw(BLException);
 abc::IUnitOfMeasurement * getUnitOfMeasurementByCode(int code) throw(BLException);
 abc::IUnitOfMeasurement * getUnitOfMeasurementByTitle(string &title) throw(BLException);
 forward_list<abc::IUnitOfMeasurement *> * getUnitOfMeasurements() throw(BLException);
+
 int unitOfMeasurementCodeExists(int code) throw(BLException);
 int unitOfMeasurementTitleExists(string &title) throw(BLException);
 int getUnitOfMeasurementCount() throw(BLException);

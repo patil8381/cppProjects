@@ -53,6 +53,8 @@ void UnitOfMeasurementManager::DataModel::populateDataStructures()
 {
 forward_list<inventory::data_layer::abc::IUnitOfMeasurement *> *dlUnitOfMeasurements;
 inventory::data_layer::UnitOfMeasurementDAO unitOfMeasurementDAO;
+try
+{
 dlUnitOfMeasurements=unitOfMeasurementDAO.getAll();
 
 inventory::data_layer::abc::IUnitOfMeasurement *dlUnitOfMeasurement;
@@ -76,6 +78,10 @@ delete dlUnitOfMeasurement;	//releasing each object
 }
 dlUnitOfMeasurements->clear();
 delete dlUnitOfMeasurements;	// releasing forward_list 
+}catch(inventory::data_layer::DAOException &daoException)
+{
+//do nothing 
+}
 
 /*
 1) iterate the dlUnitOfMeasurements forward_list
@@ -92,6 +98,7 @@ delete dlUnitOfMeasurements;	// releasing forward_list
 
 UnitOfMeasurementManager::UnitOfMeasurementManager()
 {
+// do nothing for now.
 }
 void UnitOfMeasurementManager::addUnitOfMeasurement(abc::IUnitOfMeasurement *unitOfMeasurement) throw(BLException)
 {
@@ -109,11 +116,11 @@ blException.addPropertyException("code","code should be zero");
 }
 if(title.length()==0)
 {
-blException.addPropertyException("title","titlle required");
+blException.addPropertyException("title","title required");
 }
 if(title.length()>50)
 {
-blException.addPropertyException("title","titlle cannot exceed 50 characters");
+blException.addPropertyException("title","title cannot exceed 50 characters");
 }
 if(blException.hasException())
 {
@@ -153,29 +160,303 @@ throw blException;
 }
 void UnitOfMeasurementManager::updateUnitOfMeasurement(abc::IUnitOfMeasurement *unitOfMeasurement) throw(BLException)
 {
+BLException blException;
+if(unitOfMeasurement==NULL) 
+{
+blException.setGenericException("Unit Of Measurement required, NULL encountered");
+throw blException;
+}
+int code=unitOfMeasurement->getCode();
+string title=unitOfMeasurement->getTitle();
+if(code<=0)
+{
+blException.addPropertyException("code","Invalid code");
+}
+if(title.length()==0)
+{
+blException.addPropertyException("title","title required");
+}
+if(title.length()>50)
+{
+blException.addPropertyException("title","title cannot exceed 50 characters");
+}
+if(blException.hasException())
+{
+throw blException;
+}
+int found=0;
+map<int,_UnitOfMeasurement *>::iterator i;
+i=dataModel.codeWiseMap.find(code);
+if(i!=dataModel.codeWiseMap.end() && *(i->second->title)==title) //if(compareStringIgnoreCase(title.c_str(),unitOfMeasurement->getTitle().c_str())==0)
+{
+found=1;
+}
+else
+{
+blException.setGenericException("No such Unit Of Measurement exists");
+throw blException;
+}
+inventory::data_layer::UnitOfMeasurementDAO unitOfMeasurementDAO;
+try
+{
+inventory::data_layer::abc::IUnitOfMeasurement *dlUnitOfMeasurement;
+dlUnitOfMeasurement=new inventory::data_layer::UnitOfMeasurement;
+dlUnitOfMeasurement->setCode(code);
+dlUnitOfMeasurement->setTitle(title);
+unitOfMeasurementDAO.update(dlUnitOfMeasurement);
+
+delete dlUnitOfMeasurement;
+
+map<int,_UnitOfMeasurement *>::iterator e=dataModel.codeWiseMap.find(code);
+string *t=new string(title);
+_UnitOfMeasurement *blUnitOfMeasurement;
+blUnitOfMeasurement=i->second;
+blUnitOfMeasurement->code=code;
+blUnitOfMeasurement->title=t;
+map<string *,_UnitOfMeasurement *>::iterator j=dataModel.titleWiseMap.find(&title);
+t=j->first;
+dataModel.titleWiseMap.erase(t);
+dataModel.titleWiseMap.insert(pair<string *,_UnitOfMeasurement *>(t,blUnitOfMeasurement));
+
+}catch(inventory::data_layer::DAOException daoException)
+{
+BLException blException;
+blException.setGenericException(daoException.what());
+throw blException;
+}
 }
 void UnitOfMeasurementManager::removeUnitOfMeasurementByCode(int code) throw(BLException)
 {
+BLException blException;
+if(code<=0)
+{
+blException.setGenericException("Invalid code.");
+}
+if(blException.hasException())
+{
+throw blException;
+}
+map<int ,_UnitOfMeasurement *>::iterator i;
+i=dataModel.codeWiseMap.find(code);
+if(i==dataModel.codeWiseMap.end())
+{
+blException.setGenericException("Invalid code.No such Unit of Measurement.");
+throw blException;
+}
+inventory::data_layer::UnitOfMeasurementDAO unitOfMeasurementDAO;
+try
+{
+unitOfMeasurementDAO.remove(code);
+
+_UnitOfMeasurement *blUnitOfMeasurement;
+map<int,_UnitOfMeasurement *>::iterator i=dataModel.codeWiseMap.find(code);
+blUnitOfMeasurement=i->second;
+dataModel.codeWiseMap.erase(code);
+string *t=blUnitOfMeasurement->title;
+map<string *,_UnitOfMeasurement *>::iterator j=dataModel.titleWiseMap.find(t);
+dataModel.titleWiseMap.erase(t);
+}catch(inventory::data_layer::DAOException daoException)
+{
+BLException blException;
+blException.setGenericException(daoException.what());
+throw blException;
+}
 }
 void UnitOfMeasurementManager::removeUnitOfMeasurementByTitle(string &title) throw(BLException)
 {
+BLException blException;
+string vTitle=trimmed(title);
+if(vTitle.length()<=0)
+{
+blException.setGenericException("Invalid title.title length cannot be zero.");
+}
+if(vTitle.length()>50)
+{
+blException.setGenericException("Invalid title.title length cannot exceed 50 characters.");
+}
+if(blException.hasException())
+{
+throw blException;
+}
+map<string *,_UnitOfMeasurement *>::iterator i;
+string *t=&vTitle;
+i=dataModel.titleWiseMap.find(t);
+if(i==dataModel.titleWiseMap.end())
+{
+blException.addPropertyException("title","Invalid title.No such Unit of Measurement.");
+throw blException;
+}
+inventory::data_layer::UnitOfMeasurementDAO unitOfMeasurementDAO;
+try
+{
+map<string *,_UnitOfMeasurement *,UnitOfMeasurementTitleComparator>::iterator i=dataModel.titleWiseMap.find(&vTitle);
+if(i==dataModel.titleWiseMap.end())
+{
+blException.addPropertyException("title","No such Unit of Measurement.");
+throw blException;
+}
+_UnitOfMeasurement *blUnitOfMeasurement;
+blUnitOfMeasurement=i->second;
+int code=blUnitOfMeasurement->code;
+t=blUnitOfMeasurement->title;
+unitOfMeasurementDAO.remove(code);
+dataModel.codeWiseMap.erase(code);
+dataModel.titleWiseMap.erase(t);
+}catch(inventory::data_layer::DAOException daoException)
+{
+BLException blException;
+blException.setGenericException(daoException.what());
+throw blException;
+}
 }
 abc::IUnitOfMeasurement * UnitOfMeasurementManager::getUnitOfMeasurementByCode(int code) throw(BLException)
 {
+BLException blException;
+if(code<=0)
+{
+blException.setGenericException("Invalid code.");
+}
+if(blException.hasException())
+{
+throw blException;
+}
+map<int ,_UnitOfMeasurement *>::iterator i;
+i=dataModel.codeWiseMap.find(code);
+if(i==dataModel.codeWiseMap.end())
+{
+blException.setGenericException("Invalid code.No such Unit of Measurement.");
+throw blException;
+}
+inventory::data_layer::UnitOfMeasurementDAO unitOfMeasurementDAO;
+try
+{
+_UnitOfMeasurement *blUnitOfMeasurement;
+blUnitOfMeasurement=i->second;
+abc::IUnitOfMeasurement *unitOfMeasurement;
+unitOfMeasurement=new UnitOfMeasurement;
+int code=blUnitOfMeasurement->code;
+string *t=new string(*(blUnitOfMeasurement->title));
+unitOfMeasurement->setCode(code);
+unitOfMeasurement->setTitle(*t);
+return unitOfMeasurement;
+}catch(inventory::data_layer::DAOException daoException)
+{
+BLException blException;
+blException.setGenericException(daoException.what());
+throw blException;
+}
 }
 abc::IUnitOfMeasurement * UnitOfMeasurementManager::getUnitOfMeasurementByTitle(string &title) throw(BLException)
 {
+BLException blException;
+string vTitle=trimmed(title);
+if(vTitle.length()<=0)
+{
+blException.addPropertyException("title","Invalid title.Title length cannot be zero.");
+}
+if(vTitle.length()>50)
+{
+blException.addPropertyException("title","Invalid title.Title length cannot exceed 50 characters.");
+}
+if(blException.hasException())
+{
+cout<<" 1 "<<endl;
+throw blException;
+}
+string *t = new string(vTitle);
+cout<<"vTitle : "<<vTitle<<" size : "<<vTitle.length()<<endl;
+cout<<"*t : "<<*t<<" size : "<<(*t).length()<<endl;
+map<string *,_UnitOfMeasurement *,UnitOfMeasurementTitleComparator>::iterator i;
+i=dataModel.titleWiseMap.find(&vTitle);
+if(i==dataModel.titleWiseMap.end())
+{
+cout<<" 2 "<<endl;
+blException.addPropertyException("title","Invalid title.No such Unit of Measurement.");
+throw blException;
+}
+//inventory::data_layer::UnitOfMeasurementDAO unitOfMeasurementDAO;
+try
+{
+cout<<" 3 "<<endl;
+_UnitOfMeasurement *blUnitOfMeasurement;
+blUnitOfMeasurement=i->second;
+abc::IUnitOfMeasurement *unitOfMeasurement;
+unitOfMeasurement=new UnitOfMeasurement;
+int code=blUnitOfMeasurement->code;
+t=new string(*(blUnitOfMeasurement->title));
+unitOfMeasurement->setCode(code);
+unitOfMeasurement->setTitle(*t);
+return unitOfMeasurement;
+}catch(inventory::data_layer::DAOException daoException)
+{
+BLException blException;
+blException.setGenericException(daoException.what());
+throw blException;
+}
+
 }
 forward_list<abc::IUnitOfMeasurement *> * UnitOfMeasurementManager::getUnitOfMeasurements() throw(BLException)
 {
+map<string *,_UnitOfMeasurement *>::iterator i=dataModel.titleWiseMap.begin();
+_UnitOfMeasurement *_unitOfMeasurement;
+abc::IUnitOfMeasurement *blUnitOfMeasurement;
+forward_list<abc::IUnitOfMeasurement *> *unitOfMeasurements;
+unitOfMeasurements=new forward_list<abc::IUnitOfMeasurement *>;
+forward_list<abc::IUnitOfMeasurement *>::iterator listi=unitOfMeasurements->before_begin();
+while(i!=dataModel.titleWiseMap.end())
+{
+_unitOfMeasurement=i->second;
+blUnitOfMeasurement=new UnitOfMeasurement;
+blUnitOfMeasurement->setCode(_unitOfMeasurement->code);
+blUnitOfMeasurement->setTitle(*(_unitOfMeasurement->title));
+listi=unitOfMeasurements->insert_after(listi,blUnitOfMeasurement);
+++i;
+}
+return unitOfMeasurements;
 }
 int UnitOfMeasurementManager::unitOfMeasurementCodeExists(int code) throw(BLException)
 {
+if(code<=0)
+{
+return 0;
+}
+map<int ,_UnitOfMeasurement *>::iterator i;
+i=dataModel.codeWiseMap.find(code);
+if(i!=dataModel.codeWiseMap.end())
+{
+return 1;
+}
+else return 0;
 }
 int UnitOfMeasurementManager::unitOfMeasurementTitleExists(string &title) throw(BLException)
 {
+string vTitle=trimmed(title);
+if(vTitle.length()<=0)
+{
+return 0;
+}
+if(vTitle.length()>50)
+{
+return 0;
+}
+map<string *,_UnitOfMeasurement *,UnitOfMeasurementTitleComparator>::iterator i;
+i=dataModel.titleWiseMap.find(&vTitle);
+
+if(i!=dataModel.titleWiseMap.end())
+{
+return 1;
+}
+else return 0;
 }
 int UnitOfMeasurementManager::getUnitOfMeasurementCount() throw(BLException)
 {
+int count=0;
+map<int,_UnitOfMeasurement *>::iterator i=dataModel.codeWiseMap.begin();
+while(i!=dataModel.codeWiseMap.end())
+{
+count++;
+++i;
+}
+return count;
 }
 
