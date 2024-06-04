@@ -24,8 +24,10 @@ while(i!=unitOfMeasurements->end())
 {
 uom=*i;
 cout<<"Code : "<<uom->getCode()<<",Title : "<<uom->getTitle()<<endl;
+delete uom;			//releasing memory
 ++i;
 }
 
+delete unitOfMeasurements;		//releasing memory
 return 0;
 }

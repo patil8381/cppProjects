@@ -18,6 +18,7 @@ try
 {
 uom=uommanager.getUnitOfMeasurementByTitle(title);
 cout<<"Code : "<<uom->getCode()<<",Title : "<<uom->getTitle()<<endl;
+delete uom;
 }catch(BLException &blException)
 {
 if(blException.hasException())

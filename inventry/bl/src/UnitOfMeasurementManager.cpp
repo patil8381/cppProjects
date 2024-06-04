@@ -36,17 +36,19 @@ iterate any one map and release all bl UnitOfMeasurement objects
 clear both maps.
 */
 
-//dataModel.codeWiseMap.insert(pair<int,IUnitOfMeasurement *>(dlUnitOfMeasurements->getCode(),&blUnitOfMeasurement));
-//map<string *,abc::IUnitOfMeasurement *> titleWiseMap;
-/*
-map<int,abc::IUnitOfMeasurement *>::iterator i;
-i=dataModel.codeWiseMap.begin();
-while(i!=dataModel.codeWiseMap.end())
+
+map<string *,_UnitOfMeasurement *>::iterator i;
+_UnitOfMeasurement *blUnitOfMeasurement;
+string *t;
+i=dataModel.titleWiseMap.begin();
+while(i!=dataModel.titleWiseMap.end())
 {
-delete i->second;
+blUnitOfMeasurement=i->second;
+delete blUnitOfMeasurement->title;
+delete blUnitOfMeasurement;
 ++i;
 }
-*/
+cout<<"Destructor invoked, Releasing Dynamically allocated Memory"<<endl;
 }
 
 void UnitOfMeasurementManager::DataModel::populateDataStructures()
@@ -70,10 +72,8 @@ title=new string(dlUnitOfMeasurement->getTitle());
 blUnitOfMeasurement=new _UnitOfMeasurement;
 blUnitOfMeasurement->code=code;
 blUnitOfMeasurement->title=title;
-
-codeWiseMap.insert(pair<int,_UnitOfMeasurement *>(dlUnitOfMeasurement->getCode(),blUnitOfMeasurement));
-titleWiseMap.insert(pair<string *,_UnitOfMeasurement *>(title,blUnitOfMeasurement));
-
+dataModel.codeWiseMap.insert(pair<int,_UnitOfMeasurement *>(dlUnitOfMeasurement->getCode(),blUnitOfMeasurement));
+dataModel.titleWiseMap.insert(pair<string *,_UnitOfMeasurement *>(blUnitOfMeasurement->title,blUnitOfMeasurement));
 delete dlUnitOfMeasurement;	//releasing each object
 }
 dlUnitOfMeasurements->clear();
@@ -207,7 +207,6 @@ unitOfMeasurementDAO.update(dlUnitOfMeasurement);
 
 delete dlUnitOfMeasurement;
 
-map<int,_UnitOfMeasurement *>::iterator e=dataModel.codeWiseMap.find(code);
 string *t=new string(title);
 _UnitOfMeasurement *blUnitOfMeasurement;
 blUnitOfMeasurement=i->second;
@@ -360,24 +359,20 @@ blException.addPropertyException("title","Invalid title.Title length cannot exce
 }
 if(blException.hasException())
 {
-cout<<" 1 "<<endl;
 throw blException;
 }
 string *t = new string(vTitle);
-cout<<"vTitle : "<<vTitle<<" size : "<<vTitle.length()<<endl;
-cout<<"*t : "<<*t<<" size : "<<(*t).length()<<endl;
 map<string *,_UnitOfMeasurement *,UnitOfMeasurementTitleComparator>::iterator i;
 i=dataModel.titleWiseMap.find(&vTitle);
 if(i==dataModel.titleWiseMap.end())
 {
-cout<<" 2 "<<endl;
+cout<<" 2 Not Found "<<endl;
 blException.addPropertyException("title","Invalid title.No such Unit of Measurement.");
 throw blException;
 }
-//inventory::data_layer::UnitOfMeasurementDAO unitOfMeasurementDAO;
 try
 {
-cout<<" 3 "<<endl;
+cout<<" 3 Found "<<endl;
 _UnitOfMeasurement *blUnitOfMeasurement;
 blUnitOfMeasurement=i->second;
 abc::IUnitOfMeasurement *unitOfMeasurement;

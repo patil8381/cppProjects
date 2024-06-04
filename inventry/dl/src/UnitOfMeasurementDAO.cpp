@@ -349,7 +349,7 @@ dataFile.read((char *)&_unitOfMeasurement,sizeof(_UnitOfMeasurement));
 if(dataFile.fail()) break;
 iuom=new UnitOfMeasurement;
 iuom->setCode(_unitOfMeasurement.code);
-iuom->setTitle(_unitOfMeasurement.title);
+iuom->setTitle(string(_unitOfMeasurement.title));
 i=f_list->insert_after(i,iuom);
 }
 
