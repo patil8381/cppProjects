@@ -18,6 +18,7 @@ using namespace stringutils;
 
 bool UnitOfMeasurementTitleComparator::operator()(string *left,string *right)
 {
+cout<<"comparator function called : ("<<*left<<"), ("<<*right<<")"<<endl;
 return compareStringIgnoreCase(left->c_str(),right->c_str());
 }
 
@@ -363,6 +364,15 @@ throw blException;
 }
 string *t = new string(vTitle);
 map<string *,_UnitOfMeasurement *,UnitOfMeasurementTitleComparator>::iterator i;
+i=dataModel.titleWiseMap.begin();
+_UnitOfMeasurement *bluom;
+while(i!=dataModel.titleWiseMap.end())
+{
+bluom=i->second;
+cout<<"("<<i->first<<") , code:("<<bluom->code<<"), Title:("<<*(bluom->title)<<")"<<endl;
+++i;
+}
+
 i=dataModel.titleWiseMap.find(&vTitle);
 if(i==dataModel.titleWiseMap.end())
 {
