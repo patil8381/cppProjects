@@ -1,0 +1,52 @@
+#ifndef __tmsqlite__$__
+#define __tmsqlite__$__ 1234
+#include<iostream>
+#include<sqlite3.h>
+#include<string.h>
+using namespace std;
+namespace sqlite
+{
+class SQLiteDBException:public exception
+{
+public:
+const char *errorMessage;
+public:
+SQLiteDBException();
+SQLiteDBException(const char *);
+~SQLiteDBException() throw() ;
+SQLiteDBException & operator=(const char *);
+const char * what() const throw();
+};
+class SqliteDB
+{
+class Row
+{
+private;
+int roll_number;
+char name[32];
+char gender;
+public:
+int hasMoreRows();
+Row & getRow();
+int getInt(char *);
+string getString(char *);
+};
+private:
+sqlite3 *db;
+char *errorMessage;
+char file_name[32];
+char sql[1001];
+int result;
+public:
+SqliteDB();
+SqliteDB(const string &fileName);
+void operator=(const string &fileName);
+int open(const string &fileName);
+void close();
+int executeInsert(const string &sql);
+int executeUpdate(const string &sql);
+int executeDelete(const string &sql);
+Row selectRows(cosnt string &sql);
+};
+}
+#endif
